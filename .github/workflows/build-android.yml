@@ -10,8 +10,6 @@ jobs:
     name: Build .apk
     runs-on: ubuntu-latest
     timeout-minutes: 90
-    env:
-      UNITY_PROJECT_PATH: ${{ github.workspace }}
     steps:
       - name: Checkout project
         uses: actions/checkout@v4
@@ -30,41 +28,27 @@ jobs:
           large-packages: true
           swap-storage: true
 
-      - name: Setup Unity (downloads the Editor + Android build support)
-        id: unity-setup
-        uses: buildalon/unity-setup@v2
+      - name: Cache Unity Library folder
+        uses: actions/cache@v4
         with:
-          # Pinned to the 6000.0.x LTS line rather than the exact patch recorded in
-          # ProjectVersion.txt, so this always resolves to a real, currently-downloadable
-          # patch release instead of risking a stale/incorrect changeset hash.
-          unity-version: 6000.0.x
-          build-targets: Android
-
-      - name: Activate Unity license (free Personal license)
-        uses: buildalon/activate-unity-license@v2
-        with:
-          license: 'Personal'
-          username: ${{ secrets.UNITY_USERNAME }}
-          password: ${{ secrets.UNITY_PASSWORD }}
+          path: Library
+          key: Library-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-
 
       - name: Build Android APK
-        uses: buildalon/unity-action@v3
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          log-name: 'android-build'
-          build-target: Android
-          args: '-quit -batchmode -nographics -executeMethod DancingBallOnBeats.EditorTools.BuildScript.PerformAndroidBuild'
+          targetPlatform: Android
+          allowDirtyBuild: true
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: DancingBallOnBeats-apk
-          path: Builds/Android/DancingBallOnBeats.apk
+          path: build/Android
           retention-days: 14
-
-      - name: Upload build log (only if something goes wrong)
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-log
-          path: '**/android-build*.log'
-          retention-days: 7
