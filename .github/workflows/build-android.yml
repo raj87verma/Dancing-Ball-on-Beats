@@ -1,8 +1,7 @@
 name: Build Android APK
 
 # Manual trigger only - go to the "Actions" tab on GitHub and click
-# "Run workflow" to start a build. This avoids burning build time on
-# every push while you're just getting started.
+# "Run workflow" to start a build.
 on:
   workflow_dispatch: {}
 
@@ -11,9 +10,13 @@ jobs:
     name: Build .apk
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    env:
+      UNITY_PROJECT_PATH: ${{ github.workspace }}
     steps:
       - name: Checkout project
         uses: actions/checkout@v4
+        with:
+          lfs: true
 
       # Android builds need extra disk space on the GitHub-hosted runner
       # (Unity Editor + Android SDK/NDK can be 10+ GB combined).
@@ -28,26 +31,40 @@ jobs:
           swap-storage: true
 
       - name: Setup Unity (downloads the Editor + Android build support)
-        uses: kuler90/setup-unity@v1
+        id: unity-setup
+        uses: buildalon/unity-setup@v2
         with:
-          unity-modules: android
+          # Pinned to the 6000.0.x LTS line rather than the exact patch recorded in
+          # ProjectVersion.txt, so this always resolves to a real, currently-downloadable
+          # patch release instead of risking a stale/incorrect changeset hash.
+          unity-version: 6000.0.x
+          build-targets: Android
 
-      - name: Activate Unity license
-        uses: kuler90/activate-unity@v1
+      - name: Activate Unity license (free Personal license)
+        uses: buildalon/activate-unity-license@v2
         with:
-          unity-username: ${{ secrets.UNITY_USERNAME }}
-          unity-password: ${{ secrets.UNITY_PASSWORD }}
-          unity-authenticator-key: ${{ secrets.UNITY_AUTHENTICATOR_KEY }}
+          license: 'Personal'
+          username: ${{ secrets.UNITY_USERNAME }}
+          password: ${{ secrets.UNITY_PASSWORD }}
 
       - name: Build Android APK
-        uses: kuler90/build-unity@v1
+        uses: buildalon/unity-action@v3
         with:
+          log-name: 'android-build'
           build-target: Android
-          build-path: build/DancingBallOnBeats.apk
+          args: '-quit -batchmode -nographics -executeMethod DancingBallOnBeats.EditorTools.BuildScript.PerformAndroidBuild'
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: DancingBallOnBeats-apk
-          path: build/DancingBallOnBeats.apk
+          path: Builds/Android/DancingBallOnBeats.apk
           retention-days: 14
+
+      - name: Upload build log (only if something goes wrong)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: '**/android-build*.log'
+          retention-days: 7
