@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!129 &1
+PlayerSettings:
+  serializedVersion: 26
+  productGUID: 8f2a1e6d4c3b4a2e9f1d5c6b7a8e9f0d
+  AndroidProfiler: 0
+  AndroidFilterTouchesWhenObscured: 0
+  AndroidEnableSustainedPerformanceMode: 0
+  defaultScreenOrientation: 4
+  targetDevice: 2
+  useOnDemandResources: 0
+  accelerometerFrequency: 60
+  companyName: DancingBallStudio
+  productName: Dancing Ball on Beats
+  defaultCursor: {fileID: 0}
+  cursorHotspot: {x: 0, y: 0}
+  m_SplashScreenBackgroundColor: {r: 0.0784314, g: 0.0784314, b: 0.0980392, a: 1}
+  bundleVersion: 1.0.0
+  AndroidBundleVersionCode: 1
+  AndroidMinSdkVersion: 26
+  AndroidTargetSdkVersion: 0
+  applicationIdentifier:
+    Android: com.dancingballstudio.dancingballonbeats
+  androidUseCustomKeystore: 0
+  cameraUsageDescription:
+  microphoneUsageDescription:
+  locationUsageDescription:
+  productGUID_history: []
+  scriptingDefineSymbols:
+    Android: DANCING_BALL_ANDROID
+  vulkanEnableSetSRGBWrite: 0
+  androidSupportedAspectRatio: 1
+  androidMaxAspectRatio: 2.1
+  resolutionDialogBanner: {fileID: 0}
+  m_ShowUnitySplashScreen: 1
+  m_ShowUnitySplashLogo: 1
+  disableDepthAndStencilBuffers: 0
+  activeInputHandler: 0
+  androidScreenOrientation: 4
+  androidRenderOutsideSafeArea: 1
+  androidStartInFullscreen: 1
+  androidUseSwappy: 1
