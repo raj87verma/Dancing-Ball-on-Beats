@@ -1,0 +1,53 @@
+name: Build Android APK
+
+# Manual trigger only - go to the "Actions" tab on GitHub and click
+# "Run workflow" to start a build. This avoids burning build time on
+# every push while you're just getting started.
+on:
+  workflow_dispatch: {}
+
+jobs:
+  build-android:
+    name: Build .apk
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      # Android builds need extra disk space on the GitHub-hosted runner
+      # (Unity Editor + Android SDK/NDK can be 10+ GB combined).
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: true
+          swap-storage: true
+
+      - name: Setup Unity (downloads the Editor + Android build support)
+        uses: kuler90/setup-unity@v1
+        with:
+          unity-modules: android
+
+      - name: Activate Unity license
+        uses: kuler90/activate-unity@v1
+        with:
+          unity-username: ${{ secrets.UNITY_USERNAME }}
+          unity-password: ${{ secrets.UNITY_PASSWORD }}
+          unity-authenticator-key: ${{ secrets.UNITY_AUTHENTICATOR_KEY }}
+
+      - name: Build Android APK
+        uses: kuler90/build-unity@v1
+        with:
+          build-target: Android
+          build-path: build/DancingBallOnBeats.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: DancingBallOnBeats-apk
+          path: build/DancingBallOnBeats.apk
+          retention-days: 14
